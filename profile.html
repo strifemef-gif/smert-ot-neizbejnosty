@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Личный кабинет — Смерть от неизбежности</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: 'Georgia', serif;
+            background: linear-gradient(to bottom, #0a0015, #180022, #2a0d33);
+            color: #c0b0d0;
+            min-height: 100vh;
+            overflow-y: auto;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        body::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 30% 70%, rgba(90, 60, 100, 0.08) 0%, transparent 40%),
+                        radial-gradient(circle at 70% 30%, rgba(100, 80, 120, 0.06) 0%, transparent 50%);
+            pointer-events: none;
+            animation: fadeBreathe 20s infinite alternate ease-in-out;
+            z-index: -2;
+        }
+        @keyframes fadeBreathe {
+            0% { opacity: 0.4; transform: scale(1); }
+            100% { opacity: 0.7; transform: scale(1.05); }
+        }
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(20, 10, 30, 0.92);
+            backdrop-filter: blur(5px);
+            padding: 10px 16px;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.7);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .navbar .clan-name {
+            font-family: 'Arial Black', Arial, sans-serif;
+            font-size: 24px;
+            color: #8a6eaa;
+            text-shadow: 0 0 10px rgba(138,110,170,0.6);
+            margin: 0;
+            letter-spacing: 1px;
+        }
+        .navbar .right-side {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .navbar .user-info {
+            font-size: 13px;
+            color: #d0c0e0;
+            font-weight: bold;
+        }
+        .navbar .button {
+            padding: 7px 14px;
+            background: #2e1f3f;
+            color: #d0c0e0;
+            border: 1px solid #4a3c5c;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 12px;
+            transition: all 0.25s ease;
+            cursor: pointer;
+        }
+        .navbar .button:hover {
+            background: #3f2a55;
+            box-shadow: 0 0 12px rgba(138,110,170,0.5);
+            color: white;
+        }
+        .navbar .button.logout {
+            background: #3a0f0f;
+            border-color: #7a1a1a;
+        }
+        .navbar .button.logout:hover {
+            background: #5a1616;
+        }
+        .container {
+            max-width: 720px;
+            width: 94%;
+            margin: 20px auto;
+            padding: 0 10px;
+        }
+        .profile-card {
+            background: rgba(15,5,25,0.75);
+            border: 1px solid #4a3c5c;
+            border-radius: 8px;
+            padding: 20px 16px;
+            box-shadow: 0 0 24px rgba(138,110,170,0.2);
+        }
+        h1 {
+            color: #7a5e9c;
+            text-align: center;
+            font-size: 1.8em;
+            text-shadow: 0 0 8px rgba(122,94,156,0.3);
+            margin: 0 0 18px;
+        }
+        .avatar {
+            width: 80px;
+            height: 80px;
+            background: #1f0a2a;
+            border: 2px solid #5e4a78;
+            border-radius: 50%;
+            margin: 0 auto 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.8em;
+            color: #8a6eaa;
+            box-shadow: inset 0 0 12px rgba(0,0,0,0.85);
+        }
+        .info-block, .stats-block, .change-pass-block {
+            margin: 16px 0;
+            padding: 14px;
+            background: rgba(10,3,18,0.55);
+            border: 1px solid #3a2b4c;
+            border-radius: 6px;
+        }
+        .info-block h3, .stats-block h3, .change-pass-block h3 {
+            color: #9a7ecc;
+            margin: 0 0 10px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid #4a3c5c;
+            font-size: 1.25em;
+        }
+        p.info-line {
+            margin: 6px 0;
+            font-size: 0.95em;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 10px;
+            margin-top: 8px;
+        }
+        .stat {
+            background: rgba(25,12,38,0.5);
+            padding: 10px 8px;
+            border-radius: 6px;
+            text-align: center;
+            border: 1px solid #3f2e50;
+            font-size: 0.9em;
+        }
+        .stat > div:first-child {
+            font-size: 0.95em;
+            margin-bottom: 4px;
+            opacity: 0.9;
+        }
+        .stat-value {
+            font-size: 1.5em;
+            color: #c0a0e0;
+            font-weight: bold;
+            margin: 4px 0;
+        }
+        .stat-value.live-time {
+            color: #ffaf60;
+        }
+        .form-group {
+            margin-bottom: 12px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 4px;
+            color: #d0c0e0;
+            font-size: 0.9em;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid #4a3c5c;
+            border-radius: 6px;
+            background: #180022;
+            color: #e0d0f0;
+            font-size: 14px;
+        }
+        .form-group input:focus {
+            border-color: #8a6eaa;
+            box-shadow: 0 0 6px rgba(138,110,170,0.3);
+            outline: none;
+        }
+        .submit-btn {
+            width: 100%;
+            padding: 10px;
+            background: #4a3c5c;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.25s;
+        }
+        .submit-btn:hover {
+            background: #8a6eaa;
+            box-shadow: 0 0 10px rgba(138,110,170,0.4);
+        }
+        .error-msg, .success-msg {
+            font-size: 0.85em;
+            margin-top: 4px;
+            display: none;
+        }
+        .back-link {
+            display: block;
+            margin: 20px auto 0;
+            text-align: center;
+            color: #8a6eaa;
+            text-decoration: none;
+            font-size: 0.95em;
+        }
+        .back-link:hover { color: #b090e0; text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <h1 class="clan-name">Смерть от неизбежности</h1>
+        <div class="right-side">
+            <span id="userInfo" class="user-info"></span>
+            <button class="button" onclick="window.location.href = 'intel.html'">На главную</button>
+            <a id="logoutBtn" class="button logout">Выйти</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="profile-card">
+            <h1>Личный путь</h1>
+            
+            <div class="avatar">☠</div>
+
+            <div class="info-block">
+                <h3>Сведения</h3>
+                <p class="info-line">Ник: <strong id="displayNick">—</strong></p>
+                <p class="info-line">Присоединился: <strong id="displayRegistered">загружается...</strong></p>
+            </div>
+
+            <div class="stats-block">
+                <h3>Следы в пустоте</h3>
+                <div class="stats-grid">
+                    <div class="stat">
+                        <div>Часов в безмолвии</div>
+                        <div class="stat-value live-time" id="totalTime">0</div>
+                    </div>
+                    <div class="stat">
+                        <div>Взглядов в бездну</div>
+                        <div class="stat-value">39</div>
+                    </div>
+                    <div class="stat">
+                        <div>Последний вздох</div>
+                        <div class="stat-value" data-key="lastSeen">загружается...</div>
+                    </div>
+                    <div class="stat">
+                        <div>Степень принятия</div>
+                        <div class="stat-value">IV</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="change-pass-block">
+                <h3>Изменить пароль</h3>
+                <form id="changePassForm">
+                    <div class="form-group">
+                        <label for="oldPass">Текущий пароль</label>
+                        <input type="password" id="oldPass" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="newPass">Новый пароль</label>
+                        <input type="password" id="newPass" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="newPass2">Повтори новый</label>
+                        <input type="password" id="newPass2" required>
+                    </div>
+                    <div id="passError" class="error-msg"></div>
+                    <div id="passSuccess" class="success-msg"></div>
+                    <button type="submit" class="submit-btn">Сменить</button>
+                </form>
+            </div>
+
+            <a href="intel.html" class="back-link">← вернуться на главную</a>
+        </div>
+    </div>
+
+    <script>
+        const currentUser = localStorage.getItem('currentUser');
+        if (!currentUser) {
+            alert('Сначала нужно войти');
+            window.location.href = 'intel.html';
+        }
+
+        const users = JSON.parse(localStorage.getItem('clanUsers')) || [];
+        const user = users.find(u => u.nick === currentUser);
+
+        if (!user) {
+            alert('Пользователь не найден. Попробуй войти заново.');
+            localStorage.removeItem('currentUser');
+            window.location.href = 'intel.html';
+        }
+
+        if (!user.registered) {
+            user.registered = new Date().toISOString();
+            localStorage.setItem('clanUsers', JSON.stringify(users));
+        }
+
+        const registeredDate = new Date(user.registered).toLocaleDateString('ru-RU', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+        });
+
+        document.getElementById('displayNick').textContent = user.nick;
+        document.getElementById('displayRegistered').textContent = registeredDate;
+        document.getElementById('userInfo').textContent = `Привет, ${user.nick}`;
+
+        // Счётчик времени
+        const TIME_KEY = `timeSpent_${currentUser}`;
+        let totalSeconds = parseInt(localStorage.getItem(TIME_KEY)) || 0;
+
+        function updateTimeDisplay() {
+            const hours = (totalSeconds / 3600).toFixed(1);
+            document.getElementById('totalTime').textContent = hours;
+        }
+        updateTimeDisplay();
+
+        const timerInterval = setInterval(() => {
+            totalSeconds++;
+            localStorage.setItem(TIME_KEY, totalSeconds);
+            updateTimeDisplay();
+        }, 1000);
+
+        window.addEventListener('beforeunload', () => {
+            clearInterval(timerInterval);
+            localStorage.setItem(TIME_KEY, totalSeconds);
+        });
+
+        function updateLastSeen() {
+            const now = new Date();
+            const formatted = now.toLocaleString('ru-RU', {
+                day: '2-digit', month: '2-digit', year: 'numeric',
+                hour: '2-digit', minute: '2-digit', hour12: false
+            }).replace(/(\d{2})\.(\d{2})\.(\d{4}),/, '$1.$2.$3 в');
+            document.querySelector('[data-key="lastSeen"]').textContent = formatted;
+        }
+        updateLastSeen();
+
+        document.getElementById('logoutBtn').onclick = () => {
+            clearInterval(timerInterval);
+            localStorage.removeItem('currentUser');
+            alert('Вы вышли');
+            window.location.href = 'intel.html';
+        };
+
+        document.getElementById('changePassForm').addEventListener('submit', e => {
+            e.preventDefault();
+
+            const oldPass = document.getElementById('oldPass').value;
+            const newPass = document.getElementById('newPass').value;
+            const newPass2 = document.getElementById('newPass2').value;
+
+            const errorDiv = document.getElementById('passError');
+            const successDiv = document.getElementById('passSuccess');
+
+            errorDiv.style.display = 'none';
+            successDiv.style.display = 'none';
+
+            if (oldPass !== user.pass) {
+                errorDiv.textContent = 'Текущий пароль неверный';
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            if (newPass !== newPass2) {
+                errorDiv.textContent = 'Новые пароли не совпадают';
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            if (newPass.length < 5) {
+                errorDiv.textContent = 'Новый пароль слишком короткий';
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            user.pass = newPass;
+            localStorage.setItem('clanUsers', JSON.stringify(users));
+
+            successDiv.textContent = 'Пароль изменён';
+            successDiv.style.display = 'block';
+
+            setTimeout(() => {
+                document.getElementById('changePassForm').reset();
+                successDiv.style.display = 'none';
+            }, 2500);
+        });
+    </script>
+</body>
+</html>

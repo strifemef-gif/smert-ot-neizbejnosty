@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Смерть от неизбежности</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: 'Georgia', serif;
+            background: linear-gradient(to bottom, #0a0015, #180022, #2a0d33);
+            color: #c0b0d0;
+            min-height: 100vh;
+            overflow-y: auto;
+        }
+        body::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 30% 70%, rgba(90, 60, 100, 0.08) 0%, transparent 40%),
+                        radial-gradient(circle at 70% 30%, rgba(100, 80, 120, 0.06) 0%, transparent 50%);
+            pointer-events: none;
+            animation: fadeBreathe 20s infinite alternate ease-in-out;
+            z-index: -2;
+        }
+        @keyframes fadeBreathe {
+            0% { opacity: 0.4; transform: scale(1); }
+            100% { opacity: 0.7; transform: scale(1.05); }
+        }
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(20, 10, 30, 0.92);
+            backdrop-filter: blur(5px);
+            padding: 16px 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.7);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .navbar .clan-name {
+            font-family: 'Arial Black', Arial, sans-serif;
+            font-size: 36px;
+            color: #8a6eaa;
+            text-shadow: 0 0 12px rgba(138,110,170,0.6);
+            margin: 0;
+            letter-spacing: 1px;
+        }
+        .navbar .right-side {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .navbar .user-info {
+            font-size: 16px;
+            color: #d0c0e0;
+            font-weight: bold;
+        }
+        .navbar .button {
+            padding: 10px 22px;
+            background: #2e1f3f;
+            color: #d0c0e0;
+            border: 1.5px solid #4a3c5c;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .navbar .button:hover {
+            background: #3f2a55;
+            box-shadow: 0 0 18px rgba(138,110,170,0.55);
+            color: white;
+            transform: translateY(-2px);
+        }
+        .navbar .button.logout {
+            background: #3a0f0f;
+            border-color: #7a1a1a;
+        }
+        .navbar .button.logout:hover {
+            background: #5a1616;
+            box-shadow: 0 0 18px rgba(200,50,50,0.5);
+        }
+        .navbar .button.admin {
+            background: #4a3c5c;
+            border-color: #8a6eaa;
+        }
+        .navbar .button.admin:hover {
+            background: #8a6eaa;
+            box-shadow: 0 0 18px rgba(138,110,170,0.7);
+        }
+        /* Модал */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.8);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(6px);
+        }
+        .modal-content {
+            background: rgba(20,10,30,0.97);
+            border: 1px solid #4a3c5c;
+            border-radius: 12px;
+            width: 360px;
+            max-width: 92%;
+            padding: 24px;
+            box-shadow: 0 0 40px rgba(138,110,170,0.35);
+            position: relative;
+        }
+        .close {
+            position: absolute;
+            right: 16px;
+            top: 12px;
+            font-size: 30px;
+            cursor: pointer;
+            color: #c0b0d0;
+        }
+        .close:hover { color: #8a6eaa; }
+        .tab-header {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+        }
+        .tab {
+            padding: 8px 18px;
+            cursor: pointer;
+            font-size: 16px;
+            color: #c0b0d0;
+            border-bottom: 2px solid transparent;
+            transition: 0.3s;
+        }
+        .tab.active {
+            color: #8a6eaa;
+            border-bottom: 2px solid #8a6eaa;
+            font-weight: bold;
+        }
+        .form-group {
+            margin-bottom: 18px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            color: #d0c0e0;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 11px;
+            border: 1px solid #4a3c5c;
+            border-radius: 6px;
+            background: #180022;
+            color: #e0d0f0;
+            font-size: 15px;
+        }
+        .form-group input:focus {
+            border-color: #8a6eaa;
+            box-shadow: 0 0 12px rgba(138,110,170,0.4);
+            outline: none;
+        }
+        .submit-btn {
+            width: 100%;
+            padding: 13px;
+            background: #4a3c5c;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .submit-btn:hover {
+            background: #8a6eaa;
+            box-shadow: 0 0 18px rgba(138,110,170,0.55);
+        }
+        .error-msg { color: #ff6b6b; font-size: 0.9em; margin-top: 6px; display: none; }
+        .success-msg { color: #6bff6b; font-size: 0.9em; margin-top: 6px; display: none; }
+        .container { max-width: 900px; width: 90%; margin: 40px auto; padding: 0 15px; text-align: center; }
+        h1 { color: #7a5e9c; font-size: 2.6em; text-shadow: 0 0 12px rgba(122,94,156,0.25); }
+        .lore { background: rgba(15,5,25,0.6); border: 1px solid #4a3c5c; border-radius: 8px; padding: 24px; line-height: 1.7; font-size: 1.05em; text-align: left; margin: 30px 0; }
+        .logo-placeholder { width: 110px; height: 110px; background: #2a0d33; border: 2px solid #5e4a78; border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; color: #7a5e9c; font-size: 1.1em; box-shadow: inset 0 0 20px rgba(0,0,0,0.8); }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <h1 class="clan-name">Смерть от неизбежности</h1>
+        <div class="right-side">
+            <span id="userInfo" class="user-info"></span>
+            <a id="profileLink" href="profile.html" class="button admin" style="display:none;">Личный кабинет</a>
+            <a id="loginBtn" class="button">Вход</a>
+            <a id="registerBtn" class="button">Регистрация</a>
+            <a id="logoutBtn" class="button logout" style="display:none;">Выйти</a>
+        </div>
+    </nav>
+
+    <div id="authModal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="closeModal">×</span>
+            <div class="tab-header">
+                <div class="tab active" data-tab="login">Вход</div>
+                <div class="tab" data-tab="register">Регистрация</div>
+            </div>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="loginNick">Ник</label>
+                    <input type="text" id="loginNick" required placeholder="Введи ник">
+                </div>
+                <div class="form-group">
+                    <label for="loginPass">Пароль</label>
+                    <input type="password" id="loginPass" required placeholder="Пароль">
+                </div>
+                <div id="loginError" class="error-msg">Неверный ник или пароль</div>
+                <button type="submit" class="submit-btn">Войти</button>
+            </form>
+            <form id="registerForm" style="display:none;">
+                <div class="form-group">
+                    <label for="regNick">Ник</label>
+                    <input type="text" id="regNick" required placeholder="Придумай ник">
+                </div>
+                <div class="form-group">
+                    <label for="regEmail">Почта (не обязательно)</label>
+                    <input type="email" id="regEmail" placeholder="Твоя почта">
+                </div>
+                <div class="form-group">
+                    <label for="regPass">Пароль</label>
+                    <input type="password" id="regPass" required placeholder="Придумай пароль">
+                </div>
+                <div class="form-group">
+                    <label for="regPass2">Повтори пароль</label>
+                    <input type="password" id="regPass2" required placeholder="Повтори пароль">
+                </div>
+                <div class="form-group">
+                    <label for="regKey">Ключ приглашения</label>
+                    <input type="text" id="regKey" required placeholder="Введи ключ от админа">
+                </div>
+                <div id="regError" class="error-msg">Ошибка регистрации</div>
+                <div id="regSuccess" class="success-msg"></div>
+                <button type="submit" class="submit-btn">Зарегистрироваться</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="logo-placeholder">Символ</div>
+        <h1>Смерть от неизбежности</h1>
+        <div class="lore">
+            <p>Когда всё начало рушиться, никто не заметил этого сразу. Не было грома, не было знаков с небес. Просто в какой-то момент стало ясно: дальше — только конец. Не резкий и не кровавый, а медленный и неотвратимый. Свет перестал утешать, тьма — пугать. Они утратили прежний смысл и смешались, обесценились. Те, кто верил в спасение, продолжали молиться. Те, кто привык разрушать, продолжали жечь. И те и другие не понимали одного — выбора больше нет.</p>
+            <p>Мы поняли не сразу. Принятие всегда приходит после отрицания. Сначала была злость, потом пустота, а уже после — странное спокойствие. Когда перестаёшь искать выход, начинаешь видеть дорогу. Мы не бросались на амбразуры и не клялись спасти мир — это удобная ложь. Мы просто решили идти до конца, не отворачиваясь. Не ускоряя его, но и не делая вид, что можно свернуть.</p>
+            <p>Нас называли по-разному. Одни — бездушными. Другие — фанатиками. Некоторые шептали наше имя так, будто оно само по себе способно убить. Мы не спорили. В спорах слишком много страха. Когда последние бастионы света и тьмы рухнули, мы не встали ни на чью сторону. Мы встали между. Не как судьи и не как спасители, а как те, кто останется, когда все остальные уйдут.</p>
+            <p>Мы не обещаем побед. Мы не гарантируем выживание. Мы не продаём надежду. Мы просто идём туда, куда рано или поздно придут все. И если у этого пути есть имя, то оно — Смерть от неизбежности.</p>
+        </div>
+        <p style="font-style: italic; opacity: 0.7;">Присоединяйся, если готов смотреть в конец без иллюзий.</p>
+    </div>
+
+    <script>
+        // Хранение данных
+        const USERS_KEY = 'clanUsers';
+        const KEYS_KEY = 'inviteKeys';
+        let users = JSON.parse(localStorage.getItem(USERS_KEY)) || [];
+        let availableKeys = JSON.parse(localStorage.getItem(KEYS_KEY)) || [];
+
+        // Восстановление ключей по умолчанию
+        const defaultKeys = ["testkey123", "pony666", "death999", "void000"];
+        if (!Array.isArray(availableKeys) || availableKeys.length === 0) {
+            availableKeys = [...defaultKeys];
+            localStorage.setItem(KEYS_KEY, JSON.stringify(availableKeys));
+        }
+
+        // Показ пользователя и кнопок
+        const userInfo = document.getElementById('userInfo');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const profileLink = document.getElementById('profileLink');
+
+        function updateUserDisplay() {
+            const current = localStorage.getItem('currentUser');
+            if (current) {
+                userInfo.textContent = `Привет, ${current}`;
+                logoutBtn.style.display = 'inline-block';
+                profileLink.style.display = 'inline-block';
+                document.getElementById('loginBtn').style.display = 'none';
+                document.getElementById('registerBtn').style.display = 'none';
+            } else {
+                userInfo.textContent = '';
+                logoutBtn.style.display = 'none';
+                profileLink.style.display = 'none';
+                document.getElementById('loginBtn').style.display = 'inline-block';
+                document.getElementById('registerBtn').style.display = 'inline-block';
+            }
+        }
+
+        updateUserDisplay();
+
+        logoutBtn.onclick = () => {
+            localStorage.removeItem('currentUser');
+            updateUserDisplay();
+            alert('Вы вышли');
+        };
+
+        // Модал
+        const modal = document.getElementById('authModal');
+        const closeModal = document.getElementById('closeModal');
+        const loginBtn = document.getElementById('loginBtn');
+        const registerBtn = document.getElementById('registerBtn');
+        const loginForm = document.getElementById('loginForm');
+        const registerForm = document.getElementById('registerForm');
+
+        loginBtn.addEventListener('click', () => {
+            modal.style.display = 'flex';
+            switchTab('login');
+        });
+
+        registerBtn.addEventListener('click', () => {
+            modal.style.display = 'flex';
+            switchTab('register');
+        });
+
+        closeModal.addEventListener('click', () => modal.style.display = 'none');
+        window.addEventListener('click', e => {
+            if (e.target === modal) modal.style.display = 'none';
+        });
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
+            loginForm.style.display = tab === 'login' ? 'block' : 'none';
+            registerForm.style.display = tab === 'register' ? 'block' : 'none';
+        }
+
+        // Вход
+        loginForm.addEventListener('submit', e => {
+            e.preventDefault();
+            const nick = document.getElementById('loginNick').value.trim();
+            const pass = document.getElementById('loginPass').value;
+            const user = users.find(u => u.nick === nick && u.pass === pass);
+            if (user) {
+                localStorage.setItem('currentUser', nick);
+                localStorage.setItem('lastSeen', new Date().toISOString());   // ← сохраняем время входа
+                updateUserDisplay();
+                modal.style.display = 'none';
+                alert(`Добро пожаловать обратно, ${nick}!`);
+                loginForm.reset();
+            } else {
+                document.getElementById('loginError').style.display = 'block';
+            }
+        });
+
+        // Регистрация
+        registerForm.addEventListener('submit', e => {
+            e.preventDefault();
+            const nick = document.getElementById('regNick').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
+            const pass = document.getElementById('regPass').value;
+            const pass2 = document.getElementById('regPass2').value;
+            const key = document.getElementById('regKey').value.trim();
+            const errorDiv = document.getElementById('regError');
+            errorDiv.style.display = 'none';
+
+            if (pass !== pass2) {
+                errorDiv.textContent = 'Пароли не совпадают';
+                errorDiv.style.display = 'block';
+                return;
+            }
+            if (nick.length < 3) {
+                errorDiv.textContent = 'Ник слишком короткий';
+                errorDiv.style.display = 'block';
+                return;
+            }
+            if (users.some(u => u.nick.toLowerCase() === nick.toLowerCase())) {
+                errorDiv.textContent = 'Ник занят';
+                errorDiv.style.display = 'block';
+                return;
+            }
+            const keyIndex = availableKeys.indexOf(key);
+            if (keyIndex === -1) {
+                errorDiv.textContent = 'Неверный или использованный ключ';
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            availableKeys.splice(keyIndex, 1);
+            localStorage.setItem(KEYS_KEY, JSON.stringify(availableKeys));
+            users.push({ nick, email, pass });
+            localStorage.setItem(USERS_KEY, JSON.stringify(users));
+            localStorage.setItem('currentUser', nick);
+            localStorage.setItem('lastSeen', new Date().toISOString());   // ← сохраняем время регистрации/входа
+            updateUserDisplay();
+            document.getElementById('regSuccess').textContent = 'Регистрация успешна! Вы вошли.';
+            document.getElementById('regSuccess').style.display = 'block';
+            setTimeout(() => {
+                modal.style.display = 'none';
+                registerForm.reset();
+                alert(`Добро пожаловать, ${nick}! Ключ использован.`);
+            }, 1500);
+        });
+
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') modal.style.display = 'none';
+        });
+    </script>
+</body>
+</html>
